@@ -1,19 +1,49 @@
       import PropTypes from 'prop-types';
       import styles from '../styles/home.module.css';
       import { Comments } from '../components/Comments';
-      export const Home = ({posts}) => {
+      import { useState ,useEffect} from 'react';
+      import { getPosts } from '../api';
+      import { Loader } from '../components/Loader';
+       import { Link } from 'react-router-dom';
+      export const Home = () => {
+        const [posts,setPosts] = useState([]);
+        const [loading,setLoading]=useState(true);
+        useEffect(()=>{
+          const fetchPosts = async ()=>{
+               const response=await getPosts();
+               
+               console.log("response",response);
+               if(response.success)
+               {
+                setPosts(response.data.posts);
+               }
+               setLoading(false);
+               console.log("posts",posts);
+          }
+          fetchPosts();
+        },[]);
+        if(loading)
+        {
+          return <Loader/>
+        }
         return (
           <div className={styles.postsList}>
             {posts.map((post)=>(
+              // {console.log("posts map",post.user)}
             <div className={styles.postWrapper} key={`post-${post._id}`}>
               <div className={styles.postHeader}>
                 <div className={styles.postAvatar}>
                   <img
-                    src="https://image.flaticon.com/icons/svg/2154/2154651.svg"
+                    src="https://cdn-icons-png.flaticon.com/512/219/219988.png"
                     alt="user-pic"
                   />
+                  
                   <div>
-                    <span className={styles.postAuthor}>{post.user.name}</span>
+                    <Link to={{pathname:`/user/${post.user._id}`,
+                  state:{
+                    user:post.user,
+                  },
+                  }} className={styles.postAuthor}>{post.user.name}</Link>
                     <span className={styles.postTime}>a minute ago</span>
                   </div>
                 </div>

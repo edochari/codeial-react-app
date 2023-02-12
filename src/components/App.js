@@ -1,33 +1,30 @@
 import { useEffect } from "react";
 import { getPosts } from "../api";
-import { Home,Login } from "../pages";
+import Home from "../pages/Home";
+import Login  from "../pages/Login";
 import { Loader } from "./Loader";
 import { useState } from "react";
 import { NavBar } from "./NavBar";
-import { BrowserRouter as Router,Route, Routes } from "react-router-dom";
-const About=()=>{
+import { BrowserRouter as Router,redirect,Route, Routes } from "react-router-dom";
+import { useAuth } from "../hooks";
+import Settings from "../pages/settings"
+import Signup from "../pages/signup";
+import UserProfile from "../pages/userProfile";
+import { Outlet,Navigate } from "react-router-dom";
+
+const PrivateRoutes =()=> 
+{
+  const auth=useAuth();
   return (
-    <div>About</div>
-  )
+  auth.user ? <Outlet />:<Navigate to="/login" />
+  ) 
+ 
 }
 export function App() {
-  const [posts,setPosts] = useState([]);
-  const [loading,setLoading]=useState(true);
-  useEffect(()=>{
-    const fetchPosts = async ()=>{
-         const response=await getPosts();
-         
-         console.log("response",response);
-         if(response.success)
-         {
-          setPosts(response.data.posts);
-         }
-         setLoading(false);
-         console.log("posts",posts);
-    }
-    fetchPosts();
-  },[]);
-  if(loading)
+  const auth=useAuth();
+  
+ 
+  if(auth.loading)
   {
     return <Loader />
   }
@@ -38,16 +35,21 @@ export function App() {
       <Router>
       <NavBar />
       <Routes>
-        <Route path="/"
-          element={<Home posts={posts}/>}>
+        <Route path="/" element={<Home />}>
         </Route>
         <Route path="/login" element={<Login/>}>
-          
+        </Route> 
+        <Route path="/signup" element={ <Signup />}>
         </Route>
-        <Route path="/about" element={ <About />}>
-         
+        <Route element={<PrivateRoutes/>}>
+              <Route path="/settings" element={ <Settings />}>
+              </Route>
+              <Route path="/user/:userId" element={ <UserProfile />}>
+              </Route>
         </Route>
-        </Routes>
+        
+        
+      </Routes>
       </Router> 
     </div>
   );
